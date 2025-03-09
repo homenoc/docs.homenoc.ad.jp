@@ -41,6 +41,7 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/homenoc/docs.homenoc.ad.jp/',
+          sidebarCollapsed: false,
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -75,7 +76,7 @@ const config: Config = {
           items: [
             {
               label: 'Documentation',
-              to: '/docs/intro',
+              to: '/docs/',
             },
           ],
         },
@@ -111,6 +112,11 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    docs: {
+      sidebar: {
+        autoCollapseCategories: false,
+      },
+    }
   } satisfies Preset.ThemeConfig,
 };
 
