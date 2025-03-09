@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 
 # NEC UNIVERGE IX
-
+BGP4+に未対応のため、IPv6のルーティングはできません。IPv6を利用したい場合は、Static Routingを利用してください。
 ## デフォルトルート
 ### GREトンネル
 ```
