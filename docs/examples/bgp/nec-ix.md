@@ -22,6 +22,8 @@ ip prefix-list pref-in 10 permit 0.0.0.0/0
 ip prefix-list pref-in 20 deny any
 ip prefix-list pref-out 10 permit <割り当てIPv4アドレス>
 ip prefix-list pref-out 20 deny any
+ip access-list proxy-dns permit ip src <割り当てIPv4アドレス> dest any
+ip access-list proxy-dns deny ip src any dest any
 !
 !
 ipv6 ufs-cache enable
@@ -35,6 +37,7 @@ ipv6 ufs-cache enable
 !
 !
 proxy-dns ip enable
+proxy-dns ip access-list proxy-dns
 proxy-dns server <任意のDNSサーバアドレス>
 !
 !
