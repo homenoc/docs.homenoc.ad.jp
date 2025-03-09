@@ -72,6 +72,7 @@ interface GigaEthernet0.0
   ipv6 enable
   ipv6 interface-identifier xx:xx:xx:xx:xx:xx:xx:xx
   ipv6 address autoconfig receive-default
+  ipv6 traffic-class tos 0
   no shutdown
 !
 interface GigaEthernet1.0
