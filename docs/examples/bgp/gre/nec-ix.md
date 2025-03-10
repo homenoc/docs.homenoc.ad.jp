@@ -7,10 +7,10 @@ BGP4+に未対応のため、IPv6のルーティングはできません。IPv6�
 
 ## 構成
 アンダーレイ: NGN(IPv6 RA方式)  
+トンネリング: GRE
 ルータ: IX2215
 
 Flet'sのONUをIX2215 GigaEthernet0に接続し、IX2215 GigaEthernet2にサーバを接続します。  
-NGNからのIPv6アドレス/プレフィックスの割り当てはIPv6 RA方式であるとします。(DHCPv6-PDではありません)  
 ServerへのIPアドレスの割り当てはDHCPを利用します。  
 NEC UNIVERGE IXでSSHやTELNET、SNMP機能などを利用する際は、適切なACL設定を行ってください。
 ```mermaid
