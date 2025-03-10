@@ -6,8 +6,11 @@ sidebar_position: 1
 BGP4+に未対応のため、IPv6のルーティングはできません。IPv6を利用したい場合は、Static Routingを利用してください
 
 ## 構成
+アンダーレイ: NGN(IPv6 RA方式)  
+ルータ: IX2215
+
 Flet'sのONUをIX2215 GigaEthernet0に接続し、IX2215 GigaEthernet2にサーバを接続します。  
-NGNからのIPv6の割り当てはIPv6 RA方式であるとします。(DHCPv6-PDではありません)  
+NGNからのIPv6アドレス/プレフィックスの割り当てはIPv6 RA方式であるとします。(DHCPv6-PDではありません)  
 ServerへのIPアドレスの割り当てはDHCPを利用します。  
 NEC UNIVERGE IXでSSHやTELNET、SNMP機能などを利用する際は、適切なACL設定を行ってください。
 ```mermaid
@@ -134,3 +137,17 @@ interface Tunnel0.0
 
 ## フルルート
 機器の性能上、フルルートを受信することはできません。
+
+## 補足: MSSについて
+config中に、以下のようにIPv4 TCPのMSSを指定している箇所があります。参考までに計算方法を紹介します。
+```
+interface Tunnel0.0
+! 以下のMSS値は、MTUが1500の場合の値です。MTUが異なる場合は適宜調整してください。
+  ip tcp adjust-mss 1416
+```
+
+```
+1500 -         40        -      4     -         20        -     20     = 1416
+ MTU   Outer IPv6 Header   GRE Header   Inner IPv4 Header   TCP Header    MSS
+単位: byte
+```
