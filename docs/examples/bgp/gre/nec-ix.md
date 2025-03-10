@@ -92,7 +92,7 @@ device USB0
 interface GigaEthernet0.0
   no ip address
   ipv6 enable
-! 以下のコマンドで、IPv6アドレスのホスト部を指定する
+! 以下のコマンドで、IPv6アドレスのインターフェースIDを指定する
   ipv6 interface-identifier xx:xx:xx:xx:xx:xx:xx:xx
   ipv6 address autoconfig receive-default
   ipv6 traffic-class tos 0
