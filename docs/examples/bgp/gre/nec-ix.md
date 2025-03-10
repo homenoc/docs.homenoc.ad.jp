@@ -26,7 +26,6 @@ architecture-beta
 ```
 
 ## デフォルトルート
-### GREトンネル
 ```
 ! NEC Portable Internetwork Core Operating System Software
 ! IX Series IX2215 (magellan-sec) Software, Version 10.7.18, RELEASE SOFTWARE
@@ -38,13 +37,13 @@ timezone +09 00
 !
 ip ufs-cache enable
 ! GigaEthernet2がdownでもルートを広報する
-ip route <割り当てIPv4アドレス> Null0.0
+ip route <割り当てIPv4プレフィクス> Null0.0
 ip dhcp enable
 ip prefix-list pref-in 10 permit 0.0.0.0/0
 ip prefix-list pref-in 20 deny any
-ip prefix-list pref-out 10 permit <割り当てIPv4アドレス>
+ip prefix-list pref-out 10 permit <割り当てIPv4プレフィクス>
 ip prefix-list pref-out 20 deny any
-ip access-list proxy-dns permit ip src <割り当てIPv4アドレス> dest any
+ip access-list proxy-dns permit ip src <割り当てIPv4プレフィクス> dest any
 ip access-list proxy-dns deny ip src any dest any
 !
 !
@@ -70,12 +69,12 @@ ip dhcp profile server1
   default-gateway <自身のルータのアドレス>
   dns-server <自身のルータのアドレス>
 !
-router bgp <AS番号>
+router bgp <割り当てられたAS番号>
   neighbor <HomeNOC側境界アドレス> remote-as 59105
   address-family ipv4 unicast
     neighbor <HomeNOC側境界アドレス> distribute-list pref-in in
     neighbor <HomeNOC側境界アドレス> distribute-list pref-out out
-    network <割り当てIPv4アドレス>
+    network <割り当てIPv4プレフィクス>
 !
 device GigaEthernet0
 !
@@ -103,7 +102,7 @@ interface GigaEthernet1.0
   shutdown
 !
 interface GigaEthernet2.0
-  ip address <自身のルータのアドレス>/29
+  ip address <自身のルータのアドレス>/<割り当てられたIPv4プレフィクス長>
   ip dhcp binding server1
   no shutdown
 !
@@ -128,7 +127,7 @@ interface Null0.0
 interface Tunnel0.0
   tunnel mode gre ipv6
   tunnel destination <トンネル終端アドレス（HomeNOC側）>
-  ip address <貴団体側トンネル境界アドレス>/31
+  ip address <貴団体側トンネル境界アドレス>
 ! 以下のMSS値は、MTUが1500の場合の値です。MTUが異なる場合は適宜調整してください。
   ip tcp adjust-mss 1416
   no shutdown
