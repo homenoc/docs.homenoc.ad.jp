@@ -7,7 +7,7 @@ BGP4+に未対応のため、IPv6のルーティングはできません。IPv6�
 
 ## 構成
 アンダーレイ: NGN(IPv6 RA方式)  
-トンネリング: GRE
+トンネリング: GRE  
 ルータ: IX2215
 
 Flet'sのONUをIX2215 GigaEthernet0に接続し、IX2215 GigaEthernet2にサーバを接続します。  
