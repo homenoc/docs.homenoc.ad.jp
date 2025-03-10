@@ -3,7 +3,25 @@ sidebar_position: 1
 ---
 
 # NEC UNIVERGE IX
-BGP4+に未対応のため、IPv6のルーティングはできません。IPv6を利用したい場合は、Static Routingを利用してください。
+BGP4+に未対応のため、IPv6のルーティングはできません。IPv6を利用したい場合は、Static Routingを利用してください
+
+## 構成
+Flet'sのONUをIX2215 GigaEthernet0に接続し、IX2215 GigaEthernet2にサーバを接続します。  
+NGNからのIPv6の割り当てはIPv6 RA方式であるとします。(DHCPv6-PDではありません)  
+ServerへのIPアドレスの割り当てはDHCPを利用します。  
+NEC UNIVERGE IXでSSHやTELNET、SNMP機能などを利用する際は、適切なACL設定を行ってください。
+```mermaid
+architecture-beta
+
+    service onu(clarity:hard-disk-solid)[ONU]
+    service IX2215(clarity:router-solid)[GE0 IX2215 GE2]
+    service server(clarity:server-solid)[Server]
+
+    onu:R -- L:IX2215
+    IX2215:R -- L:server
+
+```
+
 ## デフォルトルート
 ### GREトンネル
 ```
@@ -16,6 +34,7 @@ timezone +09 00
 !
 !
 ip ufs-cache enable
+! GigaEthernet2がdownでもルートを広報する
 ip route <割り当てIPv4アドレス> Null0.0
 ip dhcp enable
 ip prefix-list pref-in 10 permit 0.0.0.0/0
@@ -70,6 +89,7 @@ device USB0
 interface GigaEthernet0.0
   no ip address
   ipv6 enable
+! 以下のコマンドで、IPv6アドレスのホスト部を指定する
   ipv6 interface-identifier xx:xx:xx:xx:xx:xx:xx:xx
   ipv6 address autoconfig receive-default
   ipv6 traffic-class tos 0
