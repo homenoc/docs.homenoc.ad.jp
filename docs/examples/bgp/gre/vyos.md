@@ -31,14 +31,23 @@ architecture-beta
 - 例示環境
   - サンプルコンフィグ内のIPアドレスは、以下の仮定の下、設定しています。実際に投入する際は、ダッシュボードの値をもとに、適宜変更してください。
   - 割り当てIPv4 Prefix: 192.0.2.0/29  
+    - ルータのIPv4アドレス: 192.0.2.6/29
+    - DHCPサーバの割り当て範囲:
+      - 開始: 192.0.2.1
+      - 終了: 192.0.2.5
   - 割り当てIPv6 Prefix: 2001:db8:1::/56
+    - ルータのIPv6アドレス: 2001:db8:1::fffe/64
   - トンネル用IPv4 Prefix: 192.0.2.254/31
+    - 弊団体側IPv4アドレス: 192.0.2.254/31
+    - 貴団体側IPv4アドレス: 192.0.2.255/31
   - トンネル用IPv6 Prefix: 2001:db8:ffff::/64
+    - 弊団体側IPv6アドレス: 2001:db8:ffff::1/64
+    - 貴団体側IPv6アドレス: 2001:db8:ffff::2/64
 - 変数
   - サンプルコンフィグ内の変数は以下の通りです。実際に投入する際は、ダッシュボードの値をもとに、もしくは実際の環境をもとに、適宜変更してください。
   - [NGN IPv6 Prefix] e.g. 2001:db8:2::
   - [ASN]
-  - [HomeNOC側トンネル終端アドレス]
+  - [弊団体側トンネル終端アドレス]
   - [ネームサーバのIPアドレス]
   - [IPv6 Interface Identifier] e.g. 0000:0000:0000:fffe
 ```
@@ -107,7 +116,7 @@ interfaces {
                 encaplimit none
             }
         }
-        remote [HomeNOC側トンネル終端アドレス]
+        remote [弊団体側トンネル終端アドレス]
         source-address [NGN IPv6 Prefix]:[IPv6 Interface Identifier]
         source-interface eth0
     }
@@ -457,7 +466,7 @@ set interfaces tunnel tun0 encapsulation 'ip6gre'
 set interfaces tunnel tun0 ip adjust-mss '1416'
 set interfaces tunnel tun0 ipv6 adjust-mss '1396'
 set interfaces tunnel tun0 parameters ipv6 encaplimit 'none'
-set interfaces tunnel tun0 remote '[HomeNOC側トンネル終端アドレス]'
+set interfaces tunnel tun0 remote '[弊団体側トンネル終端アドレス]'
 set interfaces tunnel tun0 source-address '[NGN IPv6 Prefix]:[IPv6 Interface Identifier]'
 set interfaces tunnel tun0 source-interface 'eth0'
 set policy prefix-list AS[ASN] rule 10 action 'permit'
