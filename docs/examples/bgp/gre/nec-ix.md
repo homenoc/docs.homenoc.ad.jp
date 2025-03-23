@@ -36,12 +36,12 @@ architecture-beta
   - トンネル用IPv4 Prefix: 192.0.2.254/31
     - 弊団体側IPv4アドレス: 192.0.2.254/31
     - 貴団体側IPv4アドレス: 192.0.2.255/31
+  - 貴団体側ASN: 64512
+  - 弊団体側トンネル終端アドレス: 2001:db8:fffe::1
+  - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
+  - IPv6 Interface Identifier: 00:00:00:00:00:00:00:01
 - 変数
   - サンプルコンフィグ内の変数は以下の通りです。実際に投入する際は、ダッシュボードの値をもとに、もしくは実際の環境をもとに、適宜変更してください。
-  - [ASN]
-  - [弊団体側トンネル終端アドレス]
-  - [ネームサーバのIPアドレス]
-  - [IPv6 Interface Identifier] e.g. 00:00:00:00:00:00:ff:fe
 ```
 ! NEC Portable Internetwork Core Operating System Software
 ! IX Series IX2215 (magellan-sec) Software, Version 10.7.18, RELEASE SOFTWARE
@@ -55,8 +55,6 @@ ip ufs-cache enable
 ! GigaEthernet2がdownでもルートを広報する
 ip route 192.0.2.0/29 Null0.0
 ip dhcp enable
-ip prefix-list pref-in 10 permit 0.0.0.0/0
-ip prefix-list pref-in 20 deny any
 ip prefix-list pref-out 10 permit 192.0.2.0/29
 ip prefix-list pref-out 20 deny any
 ip access-list proxy-dns permit ip src 192.0.2.0/29 dest any
@@ -75,7 +73,7 @@ ipv6 ufs-cache enable
 !
 proxy-dns ip enable
 proxy-dns ip access-list proxy-dns
-proxy-dns server [ネームサーバのIPアドレス]
+proxy-dns server 198.51.100.1
 !
 !
 !
@@ -85,10 +83,9 @@ ip dhcp profile server1
   default-gateway 192.0.2.6
   dns-server 192.0.2.6
 !
-router bgp [ASN]
+router bgp 64512
   neighbor 192.0.2.254 remote-as 59105
   address-family ipv4 unicast
-    neighbor 192.0.2.254 distribute-list pref-in in
     neighbor 192.0.2.254 distribute-list pref-out out
     network 192.0.2.0/29
 !
@@ -108,7 +105,7 @@ interface GigaEthernet0.0
   no ip address
   ipv6 enable
 ! 以下のコマンドで、IPv6アドレスのインターフェースIDを指定する
-  ipv6 interface-identifier [IPv6 Interface Identifier]
+  ipv6 interface-identifier 00:00:00:00:00:00:00:01
   ipv6 address autoconfig receive-default
   ipv6 traffic-class tos 0
   no shutdown
@@ -142,7 +139,7 @@ interface Null0.0
 !
 interface Tunnel0.0
   tunnel mode gre ipv6
-  tunnel destination [弊団体側トンネル終端アドレス]
+  tunnel destination 2001:db8:fffe::1
   ip address 192.0.2.255/31
 ! 以下のMSS値は、MTUが1500の場合の値です。MTUが異なる場合は適宜調整してください。
   ip tcp adjust-mss 1416
