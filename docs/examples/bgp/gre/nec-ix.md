@@ -37,7 +37,7 @@ architecture-beta
     - 弊団体側IPv4アドレス: 192.0.2.254/31
     - 貴団体側IPv4アドレス: 192.0.2.255/31
   - 貴団体側ASN: 64512
-  - 弊団体側トンネル終端アドレス: 2001:db8:fffe::1
+  - 弊団体側トンネル終端アドレス: 2001:db8:3::1
   - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
   - IPv6 Interface Identifier: 00:00:00:00:00:00:00:01
 - 変数
@@ -139,7 +139,7 @@ interface Null0.0
 !
 interface Tunnel0.0
   tunnel mode gre ipv6
-  tunnel destination 2001:db8:fffe::1
+  tunnel destination 2001:db8:3::1
   ip address 192.0.2.255/31
 ! 以下のMSS値は、MTUが1500の場合の値です。MTUが異なる場合は適宜調整してください。
   ip tcp adjust-mss 1416
