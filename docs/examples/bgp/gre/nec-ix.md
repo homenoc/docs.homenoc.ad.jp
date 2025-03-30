@@ -40,8 +40,7 @@ architecture-beta
   - 弊団体側トンネル終端アドレス: 2001:db8:3::1
   - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
   - IPv6 Interface Identifier: 00:00:00:00:00:00:00:01
-- 変数
-  - サンプルコンフィグ内の変数は以下の通りです。実際に投入する際は、ダッシュボードの値をもとに、もしくは実際の環境をもとに、適宜変更してください。
+
 ```
 ! NEC Portable Internetwork Core Operating System Software
 ! IX Series IX2215 (magellan-sec) Software, Version 10.7.18, RELEASE SOFTWARE
