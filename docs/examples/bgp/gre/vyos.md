@@ -192,8 +192,8 @@ service {
                     name-server 192.0.2.6
                 }
                 range RANGE1 {
-                    start 202.226.7.153
-                    stop 202.226.7.157
+                    start 192.0.2.1
+                    stop 192.0.2.5
                 }
                 subnet-id 1
             }
