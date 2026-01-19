@@ -106,6 +106,7 @@ interface GigaEthernet0.0
   ipv6 interface-identifier 00:00:00:00:00:00:00:01
   ipv6 address autoconfig receive-default
   ipv6 traffic-class tos 0
+  bridge-group 1
   no shutdown
 !
 interface GigaEthernet1.0
