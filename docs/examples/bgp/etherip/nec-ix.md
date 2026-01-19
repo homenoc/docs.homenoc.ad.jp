@@ -147,6 +147,7 @@ interface Tunnel0.0
   bridge-group 1
 ! 以下のMSS値は、MTUが1500の場合の値です。MTUが異なる場合は適宜調整してください。
   bridge ip tcp adjust-mss 1404
+  bridge ipv6 tcp adjust-mss 1384
   no shutdown
 !
 ```
