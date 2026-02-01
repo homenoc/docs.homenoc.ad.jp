@@ -10,7 +10,8 @@ sidebar_position: 2
 アンダーレイ: NGN(IPv6 RA方式)  
 トンネリング: GRE  
 
-\* バージョンによってコマンドが一部異なる場合があります。また、`interfaces <if type> <if name> ipv6 address interface-identifier <id>` コマンドは、現在実装中のため使用できません。実装が完了していたら投入してください。https://github.com/vyos/vyos-1x/pull/4392
+\* ~~バージョンによってコマンドが一部異なる場合があります。また、`interfaces <if type> <if name> ipv6 address interface-identifier <id>` コマンドは、現在実装中のため使用できません。実装が完了していたら投入してください。https://github.com/vyos/vyos-1x/pull/4392~~  
+2026/02/01追記 2025/04/23にPRがマージされたため使用できるようになりました。
 
 Flet'sのONUをVyOS eth0に接続し、VyOS eth1-eth8にサーバを接続します。  
 ServerへのIPアドレスの割り当ては、IPv4はDHCP、IPv6はRAとDHCPv6を利用します。  
