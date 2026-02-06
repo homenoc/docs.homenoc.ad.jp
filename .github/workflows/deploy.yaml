@@ -17,13 +17,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: yarn
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: bun install --frozen-lockfile --production
       - name: Build website
-        run: yarn build
+        run: bun run build
 
       - name: Upload Build Artifact
         uses: actions/upload-pages-artifact@v3
