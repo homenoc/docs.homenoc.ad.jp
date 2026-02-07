@@ -303,6 +303,67 @@ set service router-advert interface br0 other-config-flag
 set service router-advert interface br0 prefix 2001:db8:1::/64
 set vrf name NGN table '100'
 ```
+## 動作確認
+```
+vyos@vyos:~$ show bgp summary  
+
+IPv4 Unicast Summary:
+BGP router identifier 192.0.2.6, local AS number 64512 VRF default vrf-id 0
+BGP table version 2
+RIB entries 2, using 256 bytes of memory
+Peers 1, using 24 KiB of memory
+
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+fe80::5:9105    4      59105       116       108        2    0    0 00:51:20            1        1 N/A
+
+Total number of neighbors 1
+
+IPv6 Unicast Summary:
+BGP router identifier 192.0.2.6, local AS number 64512 VRF default vrf-id 0
+BGP table version 2
+RIB entries 2, using 256 bytes of memory
+Peers 1, using 24 KiB of memory
+
+Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+fe80::5:9105    4      59105       116       108        2    0    0 00:51:20            1        1 N/A
+
+Total number of neighbors 1
+```
+
+IPv4の経路交換が出来ていることが見てとれます。
+```
+vyos@vyos:~$ show ip route
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIP, O - OSPF, I - IS-IS, B - BGP, E - EIGRP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+
+IPv4 unicast VRF default:
+B>* 0.0.0.0/0 [20/0] via fe80::5:9105, tun0, weight 1, 00:51:25
+C>* 192.0.2.0/29 is directly connected, br0, weight 1, 00:50:20
+L>* 192.0.2.6/32 is directly connected, br0, weight 1, 00:50:20
+```
+
+```
+vyos@vyos:~$ show ipv6 route 
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIPng, O - OSPFv3, I - IS-IS, B - BGP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+
+IPv6 unicast VRF default:
+B>* ::/0 [20/0] via fe80::5:9105, tun0, weight 1, 00:51:25
+C>* 2001:db8:1::/64 is directly connected, br0 linkdown, weight 1, 00:50:24
+K * 2001:db8:1::/64 [0/256] is directly connected, br0 linkdown, weight 1, 00:54:17
+L>* 2001:db8:1::fffe/128 is directly connected, br0 linkdown, weight 1, 00:50:24
+C * fe80::/64 is directly connected, br0 linkdown, weight 1, 00:50:24
+C * fe80::/64 is directly connected, tun0, weight 1, 00:54:17
+C>* fe80::/64 is directly connected, lo, weight 1, 00:54:23
+```
 
 ## フルルート
 機器のメモリ容量によっては動作しません。参考までに、4GB程度あれば動作すると思われます。
