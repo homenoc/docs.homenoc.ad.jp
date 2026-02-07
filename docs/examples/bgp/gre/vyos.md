@@ -47,7 +47,7 @@ architecture-beta
   - 貴団体側ASN: 64512
   - 弊団体側トンネル終端アドレス: 2001:db8:3::1
   - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
-  - IPv6 Interface Identifier: 0000:0000:0000:0001
+  - IPv6 Interface Identifier: ::1
   - NGN IPv6 Prefix: 2001:db8:4::
 
 ```
@@ -78,7 +78,7 @@ interfaces {
         ipv6 {
             address {
                 autoconf
-                interface-identifier 0000:0000:0000:0001
+                interface-identifier ::1
             }
         }
         vrf NGN
@@ -99,7 +99,7 @@ interfaces {
             }
         }
         remote 2001:db8:3::1
-        source-address 2001:db8:4::0000:0000:0000:0001
+        source-address 2001:db8:4::1
         source-interface eth0
     }
 }
@@ -250,7 +250,7 @@ set interfaces bridge br0 member interface eth6
 set interfaces bridge br0 member interface eth7
 set interfaces bridge br0 member interface eth8
 set interfaces ethernet eth0 ipv6 address autoconf
-set interfaces ethernet eth0 ipv6 address interface-identifier '0000:0000:0000:0001'
+set interfaces ethernet eth0 ipv6 address interface-identifier '::1'
 set interfaces ethernet eth0 vrf 'NGN'
 set interfaces tunnel tun0 address '192.0.2.255/31'
 set interfaces tunnel tun0 address '2001:db8:2::2/64'
@@ -259,7 +259,7 @@ set interfaces tunnel tun0 ip adjust-mss '1416'
 set interfaces tunnel tun0 ipv6 adjust-mss '1396'
 set interfaces tunnel tun0 parameters ipv6 encaplimit 'none'
 set interfaces tunnel tun0 remote '2001:db8:3::1'
-set interfaces tunnel tun0 source-address '2001:db8:4::0000:0000:0000:0001'
+set interfaces tunnel tun0 source-address '2001:db8:4::1'
 set interfaces tunnel tun0 source-interface 'eth0'
 set policy prefix-list AS64512 rule 10 action 'permit'
 set policy prefix-list AS64512 rule 10 prefix '192.0.2.0/29'
