@@ -81,7 +81,7 @@ interfaces {
         vrf NGN
     }
     tunnel tun0 {
-        # トンネル終端アドレスとして、リンクローカルアドレスを使用します。
+        # トンネル境界アドレスとして、リンクローカルアドレスを使用します。
         address fe80::6:4512/64
         encapsulation ip6gre
         ip {
