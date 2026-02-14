@@ -5,17 +5,17 @@ sidebar_position: 2
 # VyOS
 
 ## 構成
-ハードウェア: SOPHOS XG135  
-ソフトウェア: **VyOS 1.5***  
-アンダーレイ: NGN(IPv6 RA方式)  
-トンネリング: GRE  
+RFC8950を用いたIPv6ピアによるIPv4/IPv6経路交換を行います。
 
-\* ~~バージョンによってコマンドが一部異なる場合があります。また、`interfaces <if type> <if name> ipv6 address interface-identifier <id>` コマンドは、現在実装中のため使用できません。実装が完了していたら投入してください。https://github.com/vyos/vyos-1x/pull/4392~~  
-2026/02/01追記 2025/04/23にPRがマージされたため使用できるようになりました。
+ハードウェア: SOPHOS XG135  
+ソフトウェア: VyOS 2026.02.03-0027-rolling
+アンダーレイ: NGN(IPv6 RA方式)  
+トンネリング: GRE
 
 Flet'sのONUをVyOS eth0に接続し、VyOS eth1-eth8にサーバを接続します。  
 ServerへのIPアドレスの割り当ては、IPv4はDHCP、IPv6はRAとDHCPv6を利用します。  
 SSHやTELNET、SNMP機能などを利用する際は、適切なACL設定を行ってください。
+
 ```mermaid
 architecture-beta
 
@@ -38,9 +38,6 @@ architecture-beta
       - 終了: 192.0.2.5
   - 割り当てIPv6 Prefix: 2001:db8:1::/56
     - ルータのIPv6アドレス: 2001:db8:1::fffe/64
-  - トンネル用IPv4 Prefix: 192.0.2.254/31
-    - 弊団体側IPv4アドレス: 192.0.2.254/31
-    - 貴団体側IPv4アドレス: 192.0.2.255/31
   - トンネル用IPv6 Prefix: 2001:db8:2::/64
     - 弊団体側IPv6アドレス: 2001:db8:2::1/64
     - 貴団体側IPv6アドレス: 2001:db8:2::2/64
@@ -84,7 +81,6 @@ interfaces {
         vrf NGN
     }
     tunnel tun0 {
-        address 192.0.2.255/31
         address 2001:db8:2::2/64
         encapsulation ip6gre
         ip {
@@ -154,7 +150,7 @@ protocols {
                 }
             }
         }
-        neighbor 192.0.2.254 {
+        neighbor 2001:db8:2::1 {
             address-family {
                 ipv4-unicast {
                     route-map {
@@ -164,11 +160,6 @@ protocols {
                         inbound
                     }
                 }
-            }
-            remote-as 59105
-        }
-        neighbor 2001:db8:2::1 {
-            address-family {
                 ipv6-unicast {
                     route-map {
                         export EXPORT-AS59105
@@ -178,7 +169,15 @@ protocols {
                     }
                 }
             }
+            capability {
+                # RFC8950に対応させます。
+                extended-nexthop
+            }
             remote-as 59105
+        }
+        parameters {
+            # Router IDを明示的に指定しないと、BGPセッションが確立しないようです。
+            router-id 192.0.2.6
         }
         system-as 64512
     }
@@ -252,7 +251,6 @@ set interfaces bridge br0 member interface eth8
 set interfaces ethernet eth0 ipv6 address autoconf
 set interfaces ethernet eth0 ipv6 address interface-identifier '::1'
 set interfaces ethernet eth0 vrf 'NGN'
-set interfaces tunnel tun0 address '192.0.2.255/31'
 set interfaces tunnel tun0 address '2001:db8:2::2/64'
 set interfaces tunnel tun0 encapsulation 'ip6gre'
 set interfaces tunnel tun0 ip adjust-mss '1416'
@@ -272,12 +270,13 @@ set policy route-map EXPORT-AS59105 rule 20 match ipv6 address prefix-list 'AS64
 set policy route-map EXPORT-AS59105 rule 30 action 'deny'
 set protocols bgp address-family ipv4-unicast network 192.0.2.0/29
 set protocols bgp address-family ipv6-unicast network 2001:db8:1::/56
-set protocols bgp neighbor 192.0.2.254 address-family ipv4-unicast route-map export 'EXPORT-AS59105'
-set protocols bgp neighbor 192.0.2.254 address-family ipv4-unicast soft-reconfiguration inbound
-set protocols bgp neighbor 192.0.2.254 remote-as '59105'
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv4-unicast route-map export 'EXPORT-AS59105'
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv4-unicast soft-reconfiguration inbound
 set protocols bgp neighbor 2001:db8:2::1 address-family ipv6-unicast route-map export 'EXPORT-AS59105'
 set protocols bgp neighbor 2001:db8:2::1 address-family ipv6-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 2001:db8:2::1 capability extended-nexthop
 set protocols bgp neighbor 2001:db8:2::1 remote-as '59105'
+set protocols bgp parameters router-id '192.0.2.6'
 set protocols bgp system-as '64512'
 set service dhcp-server shared-network-name SERVER1 authoritative
 set service dhcp-server shared-network-name SERVER1 subnet 192.0.2.0/29 option default-router '192.0.2.6'
@@ -297,6 +296,67 @@ set service dns forwarding no-serve-rfc1918
 set service router-advert interface br0 other-config-flag
 set service router-advert interface br0 prefix 2001:db8:1::/64
 set vrf name NGN table '100'
+```
+## 動作確認
+```
+vyos@vyos:~$ show bgp summary 
+
+IPv4 Unicast Summary:
+BGP router identifier 192.0.2.6, local AS number 64512 VRF default vrf-id 0
+BGP table version 2
+RIB entries 2, using 256 bytes of memory
+Peers 1, using 24 KiB of memory
+
+Neighbor               V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+2001:db8:2::1 4      59105        30        28        2    0    0 00:11:18            1        1 N/A
+
+Total number of neighbors 1
+
+IPv6 Unicast Summary:
+BGP router identifier 192.0.2.6, local AS number 64512 VRF default vrf-id 0
+BGP table version 2
+RIB entries 2, using 256 bytes of memory
+Peers 1, using 24 KiB of memory
+
+Neighbor               V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+2001:db8:2::1 4      59105        30        28        2    0    0 00:11:18            1        1 N/A
+
+Total number of neighbors 1
+```
+
+IPv4の経路交換が出来ていることが見てとれます。
+```
+vyos@vyos:~$ show ip route
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIP, O - OSPF, I - IS-IS, B - BGP, E - EIGRP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+
+IPv4 unicast VRF default:
+B>* 0.0.0.0/0 [20/0] via fe80::2a0:a520:7e:19ce, tun0, weight 1, 00:11:40
+C>* 192.0.2.0/29 is directly connected, br0, weight 1, 00:50:20
+L>* 192.0.2.6/32 is directly connected, br0, weight 1, 00:50:20
+```
+
+```
+vyos@vyos:~$ show ipv6 route 
+Codes: K - kernel route, C - connected, L - local, S - static,
+       R - RIPng, O - OSPFv3, I - IS-IS, B - BGP, N - NHRP,
+       T - Table, v - VNC, V - VNC-Direct, A - Babel, F - PBR,
+       f - OpenFabric, t - Table-Direct,
+       > - selected route, * - FIB route, q - queued, r - rejected, b - backup
+       t - trapped, o - offload failure
+
+IPv6 unicast VRF default:
+B>* ::/0 [20/0] via fe80::2a0:a520:7e:19ce, tun0, weight 1, 00:11:41
+C>* 2001:db8:1::/64 is directly connected, br0 linkdown, weight 1, 00:50:24
+K * 2001:db8:1::/64 [0/256] is directly connected, br0 linkdown, weight 1, 00:54:17
+L>* 2001:db8:1::fffe/128 is directly connected, br0 linkdown, weight 1, 00:50:24
+C * fe80::/64 is directly connected, br0 linkdown, weight 1, 00:50:24
+C * fe80::/64 is directly connected, tun0, weight 1, 00:54:17
+C>* fe80::/64 is directly connected, lo, weight 1, 00:54:23
 ```
 
 ## フルルート
