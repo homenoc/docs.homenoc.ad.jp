@@ -5,7 +5,7 @@ sidebar_position: 2
 # VyOS
 
 ## 構成
-RFC8950を用いたIPv6ピアによるIPv4/IPv6経路交換を行います。弊団体機器の都合により、ネイバーの自動検出は行いません。
+RFC8950を用いたIPv6ピアによるIPv4/IPv6経路交換を行います。
 
 ハードウェア: SOPHOS XG135  
 ソフトウェア: VyOS 2026.02.03-0027-rolling
@@ -38,9 +38,9 @@ architecture-beta
       - 終了: 192.0.2.5
   - 割り当てIPv6 Prefix: 2001:db8:1::/56
     - ルータのIPv6アドレス: 2001:db8:1::fffe/64
-  - トンネル用IPv6 Prefix: fe80::/64
-    - 弊団体側IPv6アドレス: fe80::5:9105/64
-    - 貴団体側IPv6アドレス: fe80::6:4512/64
+  - トンネル用IPv6 Prefix: 2001:db8:2::/64
+    - 弊団体側IPv6アドレス: 2001:db8:2::1/64
+    - 貴団体側IPv6アドレス: 2001:db8:2::2/64
   - 貴団体側ASN: 64512
   - 弊団体側トンネル終端アドレス: 2001:db8:3::1
   - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
@@ -81,17 +81,12 @@ interfaces {
         vrf NGN
     }
     tunnel tun0 {
-        # トンネル境界アドレスとして、リンクローカルアドレスを使用します。
-        address fe80::6:4512/64
+        address 2001:db8:2::2/64
         encapsulation ip6gre
         ip {
             adjust-mss 1416
         }
         ipv6 {
-            address {
-                # 先ほど手動でリンクローカルアドレスを設定したため、自動生成を無効化します。この設定がない場合、経路交換はできますがLinux Kernelに経路が投入されません。
-                no-default-link-local
-            }
             adjust-mss 1396
         }
         parameters {
@@ -155,7 +150,7 @@ protocols {
                 }
             }
         }
-        neighbor fe80::5:9105 {
+        neighbor 2001:db8:2::1 {
             address-family {
                 ipv4-unicast {
                     route-map {
@@ -178,11 +173,11 @@ protocols {
                 # RFC8950に対応させます。
                 extended-nexthop
             }
-            interface {
-                # リンクローカルアドレスを使用するため、インターフェースを明示します。
-                source-interface tun0
-            }
             remote-as 59105
+        }
+        parameters {
+            # Router IDを明示的に指定しないと、BGPセッションが確立しないようです。
+            router-id 192.0.2.6
         }
         system-as 64512
     }
@@ -256,10 +251,9 @@ set interfaces bridge br0 member interface eth8
 set interfaces ethernet eth0 ipv6 address autoconf
 set interfaces ethernet eth0 ipv6 address interface-identifier '::1'
 set interfaces ethernet eth0 vrf 'NGN'
-set interfaces tunnel tun0 address 'fe80::6:4512/64'
+set interfaces tunnel tun0 address '2001:db8:2::2/64'
 set interfaces tunnel tun0 encapsulation 'ip6gre'
 set interfaces tunnel tun0 ip adjust-mss '1416'
-set interfaces tunnel tun0 ipv6 address no-default-link-local
 set interfaces tunnel tun0 ipv6 adjust-mss '1396'
 set interfaces tunnel tun0 parameters ipv6 encaplimit 'none'
 set interfaces tunnel tun0 remote '2001:db8:3::1'
@@ -276,13 +270,13 @@ set policy route-map EXPORT-AS59105 rule 20 match ipv6 address prefix-list 'AS64
 set policy route-map EXPORT-AS59105 rule 30 action 'deny'
 set protocols bgp address-family ipv4-unicast network 192.0.2.0/29
 set protocols bgp address-family ipv6-unicast network 2001:db8:1::/56
-set protocols bgp neighbor fe80::5:9105 address-family ipv4-unicast route-map export 'EXPORT-AS59105'
-set protocols bgp neighbor fe80::5:9105 address-family ipv4-unicast soft-reconfiguration inbound
-set protocols bgp neighbor fe80::5:9105 address-family ipv6-unicast route-map export 'EXPORT-AS59105'
-set protocols bgp neighbor fe80::5:9105 address-family ipv6-unicast soft-reconfiguration inbound
-set protocols bgp neighbor fe80::5:9105 capability extended-nexthop
-set protocols bgp neighbor fe80::5:9105 interface source-interface 'tun0'
-set protocols bgp neighbor fe80::5:9105 remote-as '59105'
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv4-unicast route-map export 'EXPORT-AS59105'
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv4-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv6-unicast route-map export 'EXPORT-AS59105'
+set protocols bgp neighbor 2001:db8:2::1 address-family ipv6-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 2001:db8:2::1 capability extended-nexthop
+set protocols bgp neighbor 2001:db8:2::1 remote-as '59105'
+set protocols bgp parameters router-id '192.0.2.6'
 set protocols bgp system-as '64512'
 set service dhcp-server shared-network-name SERVER1 authoritative
 set service dhcp-server shared-network-name SERVER1 subnet 192.0.2.0/29 option default-router '192.0.2.6'
@@ -305,7 +299,7 @@ set vrf name NGN table '100'
 ```
 ## 動作確認
 ```
-vyos@vyos:~$ show bgp summary  
+vyos@vyos:~$ show bgp summary 
 
 IPv4 Unicast Summary:
 BGP router identifier 192.0.2.6, local AS number 64512 VRF default vrf-id 0
@@ -341,7 +335,7 @@ Codes: K - kernel route, C - connected, L - local, S - static,
        t - trapped, o - offload failure
 
 IPv4 unicast VRF default:
-B>* 0.0.0.0/0 [20/0] via fe80::5:9105, tun0, weight 1, 00:51:25
+B>* 0.0.0.0/0 [20/0] via fe80::2a0:a520:7e:19ce, tun0, weight 1, 00:11:40
 C>* 192.0.2.0/29 is directly connected, br0, weight 1, 00:50:20
 L>* 192.0.2.6/32 is directly connected, br0, weight 1, 00:50:20
 ```
@@ -356,7 +350,7 @@ Codes: K - kernel route, C - connected, L - local, S - static,
        t - trapped, o - offload failure
 
 IPv6 unicast VRF default:
-B>* ::/0 [20/0] via fe80::5:9105, tun0, weight 1, 00:51:25
+B>* ::/0 [20/0] via fe80::2a0:a520:7e:19ce, tun0, weight 1, 00:11:41
 C>* 2001:db8:1::/64 is directly connected, br0 linkdown, weight 1, 00:50:24
 K * 2001:db8:1::/64 [0/256] is directly connected, br0 linkdown, weight 1, 00:54:17
 L>* 2001:db8:1::fffe/128 is directly connected, br0 linkdown, weight 1, 00:50:24
