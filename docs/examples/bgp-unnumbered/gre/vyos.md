@@ -307,8 +307,8 @@ BGP table version 2
 RIB entries 2, using 256 bytes of memory
 Peers 1, using 24 KiB of memory
 
-Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
-fe80::5:9105    4      59105       116       108        2    0    0 00:51:20            1        1 N/A
+Neighbor               V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+2001:db8:2::1 4      59105        30        28        2    0    0 00:11:18            1        1 N/A
 
 Total number of neighbors 1
 
@@ -318,8 +318,8 @@ BGP table version 2
 RIB entries 2, using 256 bytes of memory
 Peers 1, using 24 KiB of memory
 
-Neighbor        V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
-fe80::5:9105    4      59105       116       108        2    0    0 00:51:20            1        1 N/A
+Neighbor               V         AS   MsgRcvd   MsgSent   TblVer  InQ OutQ  Up/Down State/PfxRcd   PfxSnt Desc
+2001:db8:2::1 4      59105        30        28        2    0    0 00:11:18            1        1 N/A
 
 Total number of neighbors 1
 ```
