@@ -41,6 +41,13 @@ architecture-beta
   - ネームサーバのIPアドレス(お好みで設定してください): 198.51.100.1
   - IPv6 Interface Identifier: 00:00:00:00:00:00:00:01
 
+> [!IMPORTANT]
+> トンネル境界アドレス(上記例示では192.0.2.254/31)では、インターネットへの通信はできません。
+> BGPピア用の設備アドレスですので、インターネットへの通信用として使用しないでください。
+>
+> 例えば、疎通確認として`ping 1.1.1.1`などとルータからpingをインターネット向けに打った場合、ソースアドレスとしてトンネル境界アドレスが選択されますので応答は返ってきません。
+> ping等で疎通確認する場合には、当団体から割り当てたIPアドレスをソースアドレスとして指定してください。（上記例示の場合、`ping XXX.XXX.XXX.XXX source-address 192.0.2.6`とするとインターネットへの疎通確認ができます。）
+
 ```
 ! NEC Portable Internetwork Core Operating System Software
 ! IX Series IX2215 (magellan-sec) Software, Version 10.7.18, RELEASE SOFTWARE
